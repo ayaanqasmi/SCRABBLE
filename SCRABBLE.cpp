@@ -1,43 +1,53 @@
-﻿
-
-#include <iostream>
-#include<stdio.h>
-#include<string.h>
-#include<windows.h>
-static char board[16][16];
+﻿#include <iostream>
 #include <stdio.h>
-void red() {
+#include <string.h>
+#include <windows.h>
+#include <stdlib.h>
+
+static char board[16][16];
+void red()
+{
     printf("\033[1;31m");
 }
 
-void green() {
+void green()
+{
     printf("\033[0;32m");
 }
-void yellow() {
+void yellow()
+{
     printf("\033[0;33m");
 }
-void blue() {
+void blue()
+{
     printf("\033[0;34m");
 }
-void cyan() {
+void cyan()
+{
     printf("\033[0;36m");
 }
 
-void magenta() {
+void magenta()
+{
     printf("\033[1;35m");
 }
 
-void reset() {
+void reset()
+{
     printf("\033[0m");
 }
 
-void InitializeBoard() {
-    for (int i = 0;i < 16;i++) {
-        for (int j = 0;j < 16;j++) {
+void InitializeBoard()
+{
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 16; j++)
+        {
             board[i][j] = ' ';
         }
     }
-    for (int i = 1;i < 16;i++) {
+    for (int i = 1; i < 16; i++)
+    {
         char a = i + 96;
         char b = i + 64;
         board[0][i] = a;
@@ -52,7 +62,8 @@ void InitializeBoard() {
     board[15][8] = '!';
     board[15][15] = '!';
     int x, y;
-    for (x = 2, y = 2;x < 15;x++, y++) {
+    for (x = 2, y = 2; x < 15; x++, y++)
+    {
         board[x][y] = '*';
         board[x][16 - y] = '*';
     }
@@ -95,31 +106,40 @@ void InitializeBoard() {
     board[15][12] = '2';
 }
 
-void DisplayBoard() {
-    for (int i = 0;i < 16;i++) {
-        for (int j = 0;j < 16;j++) {
-            if (i == 0 && j == 0) {
+void DisplayBoard()
+{
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 16; j++)
+        {
+            if (i == 0 && j == 0)
+            {
                 printf("     ");
                 continue;
             }
             green();
-            if (i == 0 || j == 0) {
+            if (i == 0 || j == 0)
+            {
                 red();
                 printf(" |");
-                
+
                 printf("%c", board[i][j]);
-                
+
                 printf("| ");
                 reset();
                 continue;
             }
-           
+
             printf(" |");
             reset();
-            if (board[i][j] == '!')magenta();
-            else if (board[i][j] == '*')yellow();
-            else if(board[i][j] == '2')cyan();
-            else if(board[i][j] == '3')blue();
+            if (board[i][j] == '!')
+                magenta();
+            else if (board[i][j] == '*')
+                yellow();
+            else if (board[i][j] == '2')
+                cyan();
+            else if (board[i][j] == '3')
+                blue();
             printf("%c", board[i][j]);
             green();
             printf("| ");
@@ -128,17 +148,81 @@ void DisplayBoard() {
         green();
         printf("\n-------------------------------------------------------------------------------\n");
         reset();
-
     }
+}
+void enterCharacterOnBoard(char ch, int x, int y)
+{
+    board[x][y] = ch;
+}
+enum Direction
+{
+    DOWN = 0,
+    UP = 1,
+    LEFT = 2,
+    RIGHT = 3
+};
 
+struct Word
+{
+    int x;
+    int y;
+    enum Direction dire;
+    char word[50];
+};
+void enterWordOnBoard(struct Word w)
+{
+    switch (w.dire)
+    {
+    case DOWN:
+        for (int i = 0; i < strlen(w.word) - 1; i++)
+        {
+            enterCharacterOnBoard(w.word[i], w.x + i, w.y);
+        }
+        break;
+    case UP:
+        for (int i = strlen(w.word) - 1, j = 0; i >= 0 && j < strlen(w.word) - 1; i--, j++)
+        {
+            enterCharacterOnBoard(w.word[j], w.x - i, w.y);
+        }
+        break;
+    case LEFT:
+        for (int i = strlen(w.word) - 1, j = 0; i >= 0 && j < strlen(w.word) - 1; i--, j++)
+        {
+            enterCharacterOnBoard(w.word[j], w.x, w.y - i);
+        }
+        break;
+
+    case RIGHT:
+        for (int i = 0; i < strlen(w.word) - 1; i++)
+        {
+            enterCharacterOnBoard(w.word[i], w.x, w.y + i);
+        }
+        break;
+    }
+}
+Word getWord()
+{
+    struct Word word;
+    printf("Enter word: ");
+    fgets(word.word, 50, stdin);
+    //fgets(word.word, 50, stdin);
+
+    printf("Enter x and y coordinates: ");
+    scanf_s("%d", &word.x);
+    scanf_s("%d", &word.y);
+
+    printf("Enter 0 for down, 1 for up, 2 for left, 3 for right: ");
+    scanf_s("%d", &word.dire);
+
+    return word;
 }
 int main()
 {
     printf("\n\n");
     InitializeBoard();
     DisplayBoard();
-    
+    struct Word w = getWord();
+    enterWordOnBoard(w);
+    system("CLS");
+    DisplayBoard();
 }
-
-
-
